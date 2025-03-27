@@ -2,18 +2,18 @@ USE master;
 GO
 
 -- Stored procedure to create the database if it doesn't exist
-CREATE OR ALTER PROCEDURE sp_CreateAutoDBJohn
+CREATE OR ALTER PROCEDURE sp_CreateAutoDBOngeziwe
 AS
 BEGIN
     BEGIN TRY
-        IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AutoDBJohn')
+        IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AutoDBOngeziwe')
         BEGIN
-            CREATE DATABASE AutoDBJohn;
-            PRINT 'Database AutoDBJohn created.';
+            CREATE DATABASE AutoDBOngeziwe;
+            PRINT 'Database AutoDBOngeziwe created.';
         END
         ELSE
         BEGIN
-            PRINT 'Database AutoDBJohn already exists.';
+            PRINT 'Database AutoDBOngeziwe already exists.';
         END
     END TRY
     BEGIN CATCH
@@ -24,16 +24,16 @@ END;
 GO
 
 -- Execute the stored procedure
-EXEC sp_CreateAutoDBJohn;
+EXEC sp_CreateAutoDBOngeziwe;
 GO
 
 -- Switch to the new database
 BEGIN TRY
-    USE AutoDBJohn;
-    PRINT 'Switched to AutoDBJohn database.';
+    USE AutoDBOngeziwe;
+    PRINT 'Switched to AutoDBOngeziwe database.';
 END TRY
 BEGIN CATCH
-    PRINT 'Error switching to AutoDBJohn: ' + ERROR_MESSAGE();
+    PRINT 'Error switching to AutoDBOngeziwe: ' + ERROR_MESSAGE();
     RETURN;
 END CATCH
 GO
