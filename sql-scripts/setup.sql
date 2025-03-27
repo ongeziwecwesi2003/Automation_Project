@@ -1,40 +1,27 @@
--------
 USE master;
 GO
 
--- Stored procedure to create the database if it doesn't exist
-CREATE OR ALTER PROCEDURE sp_CreateAutoDBOngeziwe
-AS
+-- Create the database if it doesn't exist
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AutoTest')
 BEGIN
     BEGIN TRY
-        IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AutoDBOngeziwe')
-        BEGIN
-            CREATE DATABASE AutoDBOngeziwe;
-            PRINT 'Database AutoDBOngeziwe created.';
-        END
-        ELSE
-        BEGIN
-            PRINT 'Database AutoDBOngeziwe already exists.';
-        END
+        CREATE DATABASE AutoTest;
+        PRINT 'Database AutoTest created.';
     END TRY
     BEGIN CATCH
         PRINT 'Error creating database: ' + ERROR_MESSAGE();
-        RETURN;
+        RETURN; -- Stop execution if database creation fails
     END CATCH
-END;
+END
 GO
 
--- Execute the stored procedure
-EXEC sp_CreateAutoDBOngeziwe;
-GO
-
--- Switch to the new database
+-- Switch to AutoTest database
 BEGIN TRY
-    USE AutoDBOngeziwe;
-    PRINT 'Switched to AutoDBOngeziwe database.';
+    USE AutoTest;
+    PRINT 'Switched to AutoTest database.';
 END TRY
 BEGIN CATCH
-    PRINT 'Error switching to AutoDBOngeziwe: ' + ERROR_MESSAGE();
+    PRINT 'Error switching to AutoTest: ' + ERROR_MESSAGE();
     RETURN;
 END CATCH
 GO
@@ -57,24 +44,32 @@ BEGIN
 END
 GO
 
--- Stored procedure to insert data
-CREATE OR ALTER PROCEDURE sp_InsertUserData
-AS
-BEGIN
-    BEGIN TRY
+-- Create or alter the stored procedure
+BEGIN TRY
+    EXEC('CREATE OR ALTER PROCEDURE InsertUser
+    AS
+    BEGIN
         INSERT INTO [user] (Name, Surname, Email)
         VALUES 
-            ('John', 'Doe', 'john.doe@example.com'),
-            ('Jane', 'Smith', 'jane.smith@example.com');
-        PRINT 'Sample data inserted into user table.';
-    END TRY
-    BEGIN CATCH
-        PRINT 'Error inserting data: ' + ERROR_MESSAGE();
-        RETURN;
-    END CATCH
-END;
+            (''John'', ''Doe'', ''john.doe@example.com''),
+            (''Ongeziwe'', ''Cwesi'', ''ongeziwecwesi@gmail.com''),
+            (''Jane'', ''Smith'', ''jane.smith@example.com'');
+        PRINT ''Sample data inserted.'';
+    END');
+    PRINT 'Stored procedure InsertUser created/altered.';
+END TRY
+BEGIN CATCH
+    PRINT 'Error creating stored procedure: ' + ERROR_MESSAGE();
+    RETURN;
+END CATCH
 GO
 
--- Execute the insert procedure
-EXEC sp_InsertUserData;
+-- Execute the stored procedure
+BEGIN TRY
+    EXEC InsertUser;
+    PRINT 'InsertUser executed.';
+END TRY
+BEGIN CATCH
+    PRINT 'Error executing InsertUser: ' + ERROR_MESSAGE();
+END CATCH
 GO
