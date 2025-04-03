@@ -1,0 +1,68 @@
+
+name: Reusable SQL Deployment Template
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+    secrets:
+      sql_server:
+        required: true
+      sql_user:
+        required: true
+      sql_password:
+        required: true
+
+jobs:
+  deploy-sql:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    env:
+      SQL_SERVER: ${{ secrets.sql_server }}
+      SQL_USER: ${{ secrets.sql_user }}
+      SQL_PASSWORD: ${{ secrets.sql_password }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install sqlcmd
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl gnupg
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+          echo "/opt/mssql-tools/bin" >> $GITHUB_PATH
+
+      - name: Deploy SQL
+        run: |
+          echo " Starting deployment to ${{ inputs.environment }}..."
+
+          {
+            sqlcmd -S "$SQL_SERVER" -U "$SQL_USER" -P "$SQL_PASSWORD" -i sql-scripts/setup.sql -l 60
+          } || {
+            echo " Deployment failed for ${{ inputs.environment }}"
+            exit 1
+          }
+
+          echo " Deployment successful for ${{ inputs.environment }}"
+
+      - name: Verify Deployment
+        run: |
+          echo " Verifying deployment for ${{ inputs.environment }}..."
+
+          {
+            sqlcmd -S "$SQL_SERVER" -U "$SQL_USER" -P "$SQL_PASSWORD" -Q "SELECT * FROM AutoDBOngeziwe.dbo.user" -l 60
+          } || {
+            echo " Verification failed for ${{ inputs.environment }}"
+            exit 1
+          }
+
+          echo " Verification successful for ${{ inputs.environment }}"
